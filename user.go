@@ -1,6 +1,8 @@
 package weixin
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/url"
 )
@@ -79,4 +81,37 @@ func (client *Client) UserInfo(openId string) (*UserInfo, error) {
 	}
 
 	return resp.UserInfo, nil
+}
+
+//批量获取多个指定用户的信息
+func (client *Client) UserBatchInfo(openIds []string) ([]UserInfo, error) {
+	type reqUserData struct {
+		OpenId string `json:"openid"`
+		Lang   string `json:"lang,omitempty"`
+	}
+	var reqParam struct {
+		UserList []reqUserData `json:"user_list"`
+	}
+
+	for _, openId := range openIds {
+		userData := reqUserData{OpenId: openId}
+		reqParam.UserList = append(reqParam.UserList, userData)
+	}
+
+	b, err := json.Marshal(reqParam)
+	if err != nil {
+		return nil, fmt.Errorf("参数错误: %s", err)
+	}
+
+	var resp struct {
+		BaseResponse
+		UserInfoList []UserInfo `json:"user_info_list"`
+	}
+
+	err = client.request("POST", "/user/info/batchget", nil, bytes.NewBuffer(b), &resp)
+	if err != nil {
+		return nil, fmt.Errorf("获取用户信息出错: %s", err)
+	}
+
+	return resp.UserInfoList, nil
 }

@@ -50,3 +50,27 @@ func TestUserInfo(t *testing.T) {
 		t.Log(info)
 	}
 }
+
+func TestUserBatchInfo(t *testing.T) {
+	appId := os.Getenv("APP_ID")
+	appSecret := os.Getenv("APP_SECRET")
+	if appId == "" || appSecret == "" {
+		t.Error("未找到环境变量APP_ID或APP_SECRET")
+		return
+	}
+
+	wx := New(appId, appSecret)
+	wx.LoadAccessTokenFileCache("weixin-access_token.cache")
+	defer wx.SaveAccessTokenFileCache("weixin-access_token.cache")
+
+	openIds, err := wx.UserList()
+	if err != nil {
+		t.Error(err)
+	}
+
+	info, err := wx.UserBatchInfo(openIds)
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(info)
+}
