@@ -34,6 +34,11 @@ func (client *Client) SaveAccessTokenFileCache(file string) error {
 }
 
 //获取AccessToken，如果缓存未过期则优先从缓存获取
+func (client *Client) cleanAccessTokenCache() {
+	client.accessTokenInfo.AccessToken = ""
+}
+
+//获取AccessToken，如果缓存未过期则优先从缓存获取
 func (client *Client) getAccessToken() (string, error) {
 	//先检查缓存是否有效
 	if client.accessTokenInfo.AccessToken != "" && time.Now().Before(client.accessTokenInfo.ExpireAt) {

@@ -1,7 +1,6 @@
 package weixin
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -77,7 +76,7 @@ func (client *Client) UserInfo(openId string) (*UserInfo, error) {
 	}
 	err := client.request("GET", "/user/info", getParams, nil, &resp)
 	if err != nil {
-		return nil, fmt.Errorf("获取用户OpenID列表出错: %s", err)
+		return nil, fmt.Errorf("获取用户信息出错: %s", err)
 	}
 
 	return resp.UserInfo, nil
@@ -108,9 +107,9 @@ func (client *Client) UserBatchInfo(openIds []string) ([]UserInfo, error) {
 		UserInfoList []UserInfo `json:"user_info_list"`
 	}
 
-	err = client.request("POST", "/user/info/batchget", nil, bytes.NewBuffer(b), &resp)
+	err = client.request("POST", "/user/info/batchget", nil, b, &resp)
 	if err != nil {
-		return nil, fmt.Errorf("获取用户信息出错: %s", err)
+		return nil, fmt.Errorf("获取批量用户信息出错: %s", err)
 	}
 
 	return resp.UserInfoList, nil
@@ -129,9 +128,9 @@ func (client *Client) UserUpdateRemark(openid, remark string) error {
 	}
 
 	var resp BaseResponse
-	err = client.request("POST", "/user/info/updateremark", nil, bytes.NewBuffer(reqBytes), &resp)
+	err = client.request("POST", "/user/info/updateremark", nil, reqBytes, &resp)
 	if err != nil {
-		return fmt.Errorf("获取用户信息出错: %s", err)
+		return fmt.Errorf("更新用户备注名出错: %s", err)
 	}
 
 	return nil

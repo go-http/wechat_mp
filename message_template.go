@@ -1,7 +1,6 @@
 package weixin
 
 import (
-	"bytes"
 	"encoding/json"
 )
 
@@ -31,7 +30,7 @@ func (client *Client) SendTemplateMessage(msg *TemplateMessage) (int, error) {
 		MsgId int
 	}
 
-	err := client.request("POST", "/message/template/send", nil, bytes.NewBuffer(reqBytes), &resp)
+	err := client.request("POST", "/message/template/send", nil, reqBytes, &resp)
 
 	return resp.MsgId, err
 }

@@ -1,7 +1,6 @@
 package weixin
 
 import (
-	"bytes"
 	"encoding/json"
 )
 
@@ -32,5 +31,5 @@ func (client *Client) MenuCreate(buttons []MenuButton) error {
 	reqBytes, _ := json.Marshal(reqData)
 
 	var resp BaseResponse
-	return client.request("POST", "/menu/create", nil, bytes.NewBuffer(reqBytes), &resp)
+	return client.request("POST", "/menu/create", nil, reqBytes, &resp)
 }

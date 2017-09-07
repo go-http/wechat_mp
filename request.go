@@ -1,9 +1,9 @@
 package weixin
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -13,13 +13,24 @@ import (
 const BaseURI = "https://api.weixin.qq.com/cgi-bin"
 
 type BaseResponser interface {
+	CleanError()
 	FetchError() error
+	FetchErrorCode() int
 }
 
 //响应的基础结构，用于判断全局性的错误。所有的API响应都会包含该结构
 type BaseResponse struct {
 	ErrCode int
 	ErrMsg  string
+}
+
+func (resp *BaseResponse) FetchErrorCode() int {
+	return resp.ErrCode
+}
+
+func (resp *BaseResponse) CleanError() {
+	resp.ErrCode = 0
+	resp.ErrMsg = ""
 }
 
 func (resp *BaseResponse) FetchError() error {
@@ -31,7 +42,23 @@ func (resp *BaseResponse) FetchError() error {
 }
 
 //执行API请求，会自动添加AccessToken
-func (client *Client) request(method, path string, getParams url.Values, body io.Reader, respInfo BaseResponser) error {
+func (client *Client) request(method, path string, getParams url.Values, bodyBytes []byte, respInfo BaseResponser) error {
+	//先带缓存请求
+	err := client.requestWithTokenCache(method, path, getParams, bodyBytes, respInfo)
+
+	if respInfo.FetchErrorCode() != 40001 {
+		return err
+	}
+
+	fmt.Println(respInfo.FetchError().Error(), "Retry")
+
+	//如果返回AccessToken相关的错误，则清缓存后重试一次
+	client.cleanAccessTokenCache()
+	respInfo.CleanError()
+	return client.requestWithTokenCache(method, path, getParams, bodyBytes, respInfo)
+}
+
+func (client *Client) requestWithTokenCache(method, path string, getParams url.Values, bodyBytes []byte, respInfo BaseResponser) error {
 	if getParams == nil {
 		getParams = url.Values{}
 	}
@@ -43,7 +70,7 @@ func (client *Client) request(method, path string, getParams url.Values, body io
 	getParams.Set("access_token", accessToken)
 
 	uri := BaseURI + path + "?" + getParams.Encode()
-	req, err := http.NewRequest(method, uri, body)
+	req, err := http.NewRequest(method, uri, bytes.NewBuffer(bodyBytes))
 	if err != nil {
 		return fmt.Errorf("构造请求错误: %s", err)
 	}
