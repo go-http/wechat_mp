@@ -115,3 +115,24 @@ func (client *Client) UserBatchInfo(openIds []string) ([]UserInfo, error) {
 
 	return resp.UserInfoList, nil
 }
+
+//设置用户的备注名
+func (client *Client) UserUpdateRemark(openid, remark string) error {
+	reqData := struct {
+		OpenId string `json:"openid"`
+		Remark string `json:"remark"`
+	}{openid, remark}
+
+	reqBytes, err := json.Marshal(reqData)
+	if err != nil {
+		return fmt.Errorf("参数错误: %s", err)
+	}
+
+	var resp BaseResponse
+	err = client.request("POST", "/user/info/updateremark", nil, bytes.NewBuffer(reqBytes), &resp)
+	if err != nil {
+		return fmt.Errorf("获取用户信息出错: %s", err)
+	}
+
+	return nil
+}
