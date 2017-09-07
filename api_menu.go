@@ -12,14 +12,14 @@ const (
 )
 
 type MenuButton struct {
-	Type string `json:"type"`
+	Type string `json:"type,omitempty"`
 	Name string `json:"name"`
 
-	Key      string `json:"key"`
-	Url      string `json:"url"`
-	AppId    string `json:"appid"`
-	MediaId  string `json:"media_id"`
-	PagePath string `json:"pagepath"`
+	Key      string `json:"key,omitempty"`
+	Url      string `json:"url,omitempty"`
+	AppId    string `json:"appid,omitempty"`
+	MediaId  string `json:"media_id,omitempty"`
+	PagePath string `json:"pagepath,omitempty"`
 
 	SubButton []MenuButton `json:"sub_button,omitempty"`
 }
