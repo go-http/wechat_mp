@@ -94,6 +94,7 @@ func TestUserUpdateRemark(t *testing.T) {
 	info, err := wx.UserInfo(openId)
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
 	t.Logf("Before: %s", info.Remark)
@@ -101,11 +102,13 @@ func TestUserUpdateRemark(t *testing.T) {
 	err = wx.UserUpdateRemark(openId, fmt.Sprintf("remark_test_%d", time.Now().Unix()))
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
 	info, err = wx.UserInfo(openId)
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
 	t.Logf("After: %s", info.Remark)
